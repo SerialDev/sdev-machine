@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import subprocess
+ from urllib import parse
 
 def ensure_dir(directory):
     """
@@ -70,15 +71,43 @@ url = url + projects_url
 
 soup  = make_soup(url)
 
-ol = soup.find("div", {"id": "user-repositories-list"}).find('ul')
+user_rep_list = soup.find("div", {"id": "user-repositories-list"})
+
+ol = user_rep_list.find('ul')
+
+def next_page(soup):
+    next = soup.find("div", {"id": "user-repositories-list"}).find("div", {"class": "paginate-container"}).find('a').get('href')
+    query = parse.urlparse(next).query.split('=')[0]
+    if query == 'after':
+        return next
+    else:
+        print('no more pages')
+        return 0
+
+
 
 repos = []
 for i in ol.find_all('li'):
     repos.append(i.find('h3').find('a').get('href'))
+
+
+def next_page_repos(repos_list, soup):
+    next = next_page(soup)
+    if next == 0:
+        return repos_list
+    else:
+        soup_next = make_soup(next)
+        for i in soup_next.find("div", {"id": "user-repositories-list"}).find('ul').find_all('li'):
+            repos_list.append(i.find('h3').find('a').get('href'))
+        next_page_repos(repos_list, soup_next)
+        return repos_list
+
+repos = next_page_repos(repos, soup)
+
 
 for current_repo in repos:
     if os.path.exists(rf'{os.getcwd() + os.sep + "work_den" + os.sep + current_repo.split("/")[-1] }'):
         b = execute(rf"cd {os.getcwd()+os.sep}work_den{os.sep+current_repo.split('/')[-1]} && git pull origin master")
     else:
         a = execute(rf"cd {os.getcwd()+os.sep}work_den && git clone https://github.com{current_repo}.git")
-    break
+
