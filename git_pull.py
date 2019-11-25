@@ -59,7 +59,7 @@ def execute(cmd, working_directory=os.getcwd()):
     if rc != 0:
         print("Error: failed to execute command:", cmd)
         print(error)
-    return result
+    return result, error
 
 ensure_dir('work_den')
 
@@ -77,4 +77,8 @@ for i in ol.find_all('li'):
     repos.append(i.find('h3').find('a').get('href'))
 
 for current_repo in repos:
-    a = execute(rf"cd {os.getcwd()+os.sep}work_den && git clone https://github.com{current_repo}.git")
+    if os.path.exists(rf'{os.getcwd() + os.sep + "work_den" + os.sep + current_repo.split("/")[-1] }'):
+        b = execute(rf"cd {os.getcwd()+os.sep}work_den{os.sep+current_repo.split('/')[-1]} && git pull origin master")
+    else:
+        a = execute(rf"cd {os.getcwd()+os.sep}work_den && git clone https://github.com{current_repo}.git")
+    break
