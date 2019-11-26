@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import subprocess
- from urllib import parse
+from urllib import parse
 
 def ensure_dir(directory):
     """
@@ -62,12 +62,18 @@ def execute(cmd, working_directory=os.getcwd()):
         print(error)
     return result, error
 
-ensure_dir('work_den')
+def get_root(folder=os.getcwd()):
+    return folder
+
 
 url = 'https://github.com/'
 username = 'SerialDev'
 projects_url = f'{username}?tab=repositories'
 url = url + projects_url
+root = get_root()
+work_folder_name = 'work_den'
+
+ensure_dir(f'{root + os.sep + work_folder_name}')
 
 soup  = make_soup(url)
 
@@ -106,10 +112,11 @@ repos = next_page_repos(repos, soup)
 
 
 for current_repo in repos:
-    if os.path.exists(rf'{os.getcwd() + os.sep + "work_den" + os.sep + current_repo.split("/")[-1] }'):
-        b = execute(rf"cd {os.getcwd()+os.sep}work_den{os.sep+current_repo.split('/')[-1]} && git pull origin master")
+    if os.path.exists(rf'{root + os.sep +  work_folder_name + os.sep + current_repo.split("/")[-1] }'):
+        b = execute(rf"cd {root +os.sep + work_folder_name}{os.sep+current_repo.split('/')[-1]} && git pull origin master")
     else:
-        a = execute(rf"cd {os.getcwd()+os.sep}work_den && git clone https://github.com{current_repo}.git")
+        a = execute(rf"cd {root + os.sep + work_folder_name} && git clone https://github.com{current_repo}.git")
+    break
 
 
 
