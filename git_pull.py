@@ -111,3 +111,5 @@ for current_repo in repos:
     else:
         a = execute(rf"cd {os.getcwd()+os.sep}work_den && git clone https://github.com{current_repo}.git")
 
+
+
